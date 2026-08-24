@@ -5,17 +5,17 @@ import (
 	"time"
 )
 
-type drawDto struct {
+type DrawDto struct {
 	DrawSystemId         int64
 	DrawDate             time.Time
 	GameType             string
 	multiplierValue      int
-	Results              []gameResultDto
+	Results              []GameResultDto
 	showSpecialResults   bool
 	isNewEuroJackpotDraw bool
 }
 
-type gameResultDto struct {
+type GameResultDto struct {
 	DrawDate       time.Time
 	DrawSystemId   int64
 	GameType       string
@@ -23,8 +23,8 @@ type gameResultDto struct {
 	SpecialResults []int
 }
 
-func (drawDto drawDto) toModel() model.DrawResult {
-	var resultDto gameResultDto
+func (drawDto DrawDto) ToModel() model.DrawResult {
+	var resultDto GameResultDto
 	for _, gameDto := range drawDto.Results {
 		if gameDto.GameType == drawDto.GameType {
 			resultDto = gameDto

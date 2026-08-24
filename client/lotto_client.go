@@ -62,7 +62,7 @@ func (client *LottoClient) GetLastResults() ([]model.DrawResult, error) {
 		return nil, err
 	}
 
-	var drawDtos []drawDto
+	var drawDtos []DrawDto
 
 	err = json.NewDecoder(response.Body).Decode(&drawDtos)
 	if err != nil {
@@ -72,7 +72,7 @@ func (client *LottoClient) GetLastResults() ([]model.DrawResult, error) {
 	var drawResults []model.DrawResult
 
 	for _, drawDto := range drawDtos {
-		drawResults = append(drawResults, drawDto.toModel())
+		drawResults = append(drawResults, drawDto.ToModel())
 	}
 
 	return drawResults, nil
