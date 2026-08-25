@@ -2,9 +2,11 @@ package client
 
 import (
 	"basic_api/model"
+	"basic_api/util"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -26,18 +28,6 @@ func NewLottoClient(httpClient *http.Client) *LottoClient {
 	}
 }
 
-// func (client *LottoClient) GetLastResultsByGame(gameTypeRaw string) {
-// 	gameType, err := model.GameTypeFrom(gameTypeRaw)
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	url := fmt.Sprintf(
-// 		"%s/results"
-// 	)
-
-// }
-
 func (client *LottoClient) get(url string) (resp *http.Response, err error) {
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 
@@ -47,8 +37,8 @@ func (client *LottoClient) get(url string) (resp *http.Response, err error) {
 	return client.do(request)
 }
 func (client *LottoClient) do(request *http.Request) (*http.Response, error) {
-	request.Header.Add("secret", getLottoSecret())
-	request.Header.Add("accept", "application/json")
+	request.Header.Set("secret", getLottoSecret())
+	request.Header.Set("accept", "application/json")
 	return client.httpClient.Do(request)
 }
 
@@ -69,12 +59,39 @@ func (client *LottoClient) GetLastResults() ([]model.DrawResult, error) {
 		return nil, err
 	}
 
-	var drawResults []model.DrawResult
-
-	for _, drawDto := range drawDtos {
-		drawResults = append(drawResults, drawDto.ToModel())
-	}
+	drawResults := mapDrawDtos(drawDtos)
 
 	return drawResults, nil
 
+}
+
+func (client *LottoClient) GetResultsByDate(drawDate util.Date) ([]model.DrawResult, error) {
+	params := url.Values{}
+	params.Set("drawDate", drawDate.ToString())
+	url := fmt.Sprintf(
+		"%s/draw-results/by-date?%s",
+		baseURL, params.Encode(),
+	)
+	response, err := client.get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var drawDtos []DrawDto
+
+	err = json.NewDecoder(response.Body).Decode(&drawDtos)
+	if err != nil {
+		return nil, err
+	}
+
+	drawResults := mapDrawDtos(drawDtos)
+
+	return drawResults, nil
+}
+
+func mapDrawDtos(drawDtos []DrawDto) (drawResults []model.DrawResult) {
+	for _, drawDto := range drawDtos {
+		drawResults = append(drawResults, drawDto.ToModel())
+	}
+	return
 }

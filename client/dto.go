@@ -2,6 +2,7 @@ package client
 
 import (
 	"basic_api/model"
+	"sort"
 	"time"
 )
 
@@ -28,6 +29,8 @@ func (drawDto DrawDto) ToModel() model.DrawResult {
 	for _, gameDto := range drawDto.Results {
 		if gameDto.GameType == drawDto.GameType {
 			resultDto = gameDto
+			sort.Ints(resultDto.ResultsJson)
+			sort.Ints(resultDto.SpecialResults)
 			break
 		}
 	}
