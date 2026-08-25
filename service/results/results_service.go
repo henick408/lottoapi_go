@@ -1,9 +1,9 @@
 package results
 
 import (
-	"basic_api/client"
-	"basic_api/model"
-	"basic_api/util"
+	"lottoapi/client"
+	"lottoapi/model"
+	"lottoapi/util"
 )
 
 type ResultService struct {
@@ -32,5 +32,12 @@ func (service *ResultService) GetResultsByDate(drawDate util.Date) ([]model.Draw
 	}
 
 	return drawResults, nil
+}
 
+func (service *ResultService) GetResulstByGame(gameType model.GameType) ([]model.DrawResult, error) {
+	drawResults, err := service.lottoClient.GetResultsByGame(string(gameType))
+	if err != nil {
+		return nil, err
+	}
+	return drawResults, nil
 }

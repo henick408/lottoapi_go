@@ -1,7 +1,7 @@
 package client
 
 import (
-	"basic_api/model"
+	"lottoapi/model"
 	"sort"
 	"time"
 )

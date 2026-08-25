@@ -20,7 +20,7 @@ func GameTypeFrom(value string) (GameType, error) {
 	case "lotto":
 		return GameTypeLotto, nil
 	case "minilotto":
-		return GameTypeLotto, nil
+		return GameTypeMiniLotto, nil
 	case "lottoplus":
 		return GameTypeLottoPlus, nil
 	case "eurojackpot":

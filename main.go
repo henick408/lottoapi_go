@@ -1,10 +1,10 @@
 package main
 
 import (
-	"basic_api/client"
-	resultHandler "basic_api/handler/results"
-	resultService "basic_api/service/results"
 	"fmt"
+	"lottoapi/client"
+	resultHandler "lottoapi/handler/results"
+	resultService "lottoapi/service/results"
 	"net/http"
 	"time"
 )
@@ -19,6 +19,7 @@ func main() {
 	resultService := resultService.NewResultService(client)
 	resultHandler := resultHandler.NewResultHandler(resultService)
 	http.HandleFunc("GET /results", resultHandler.GetAllHandler)
+	http.HandleFunc("GET /results/{gameType}", resultHandler.GetByGameHandler)
 
 	port := 8080
 	fmt.Printf("Listening on port %d\n", port)

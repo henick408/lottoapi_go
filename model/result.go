@@ -1,7 +1,7 @@
 package model
 
 import (
-	"basic_api/response"
+	"lottoapi/response"
 	"time"
 )
 

@@ -1,10 +1,10 @@
 package client
 
 import (
-	"basic_api/model"
-	"basic_api/util"
 	"encoding/json"
 	"fmt"
+	"lottoapi/model"
+	"lottoapi/util"
 	"net/http"
 	"net/url"
 	"os"
@@ -94,4 +94,32 @@ func mapDrawDtos(drawDtos []DrawDto) (drawResults []model.DrawResult) {
 		drawResults = append(drawResults, drawDto.ToModel())
 	}
 	return
+}
+
+func (client *LottoClient) GetResultsByGame(gameTypeStr string) ([]model.DrawResult, error) {
+	gameType, err := model.GameTypeFrom(gameTypeStr)
+	if err != nil {
+		return nil, err
+	}
+	params := url.Values{}
+	params.Set("gameType", string(gameType))
+	url := fmt.Sprintf(
+		"%s/draw-results/last-results-per-game?%s",
+		baseURL, params.Encode(),
+	)
+
+	response, err := client.get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var drawDtos []DrawDto
+
+	err = json.NewDecoder(response.Body).Decode(&drawDtos)
+	if err != nil {
+		return nil, err
+	}
+	drawResults := mapDrawDtos(drawDtos)
+
+	return drawResults, nil
 }

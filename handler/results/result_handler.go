@@ -1,11 +1,11 @@
 package results
 
 import (
-	"basic_api/model"
-	"basic_api/response"
-	"basic_api/service/results"
-	"basic_api/util"
 	"encoding/json"
+	"lottoapi/model"
+	"lottoapi/response"
+	"lottoapi/service/results"
+	"lottoapi/util"
 	"net/http"
 	"time"
 )
@@ -46,17 +46,45 @@ func (handler *ResultHandler) GetAllHandler(writer http.ResponseWriter, request 
 		results, err = handler.service.GetLastResults()
 	}
 
+	if results == nil {
+		http.Error(writer, "No results found for given date", http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var responses []response.ResultResponse
-
-	for _, result := range results {
-		responses = append(responses, result.ToResponse())
-	}
+	responses := mapToResponses(results)
 
 	json.NewEncoder(writer).Encode(responses)
 
+}
+
+func (handler *ResultHandler) GetByGameHandler(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Content-Type", "application/json")
+	gameTypeStr := request.PathValue("gameType")
+
+	gameType, err := model.GameTypeFrom(gameTypeStr)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	results, err := handler.service.GetResulstByGame(gameType)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	responses := mapToResponses(results)
+	json.NewEncoder(writer).Encode(responses)
+}
+
+func mapToResponses(results []model.DrawResult) (responses []response.ResultResponse) {
+	for _, result := range results {
+		responses = append(responses, result.ToResponse())
+	}
+	return
 }
