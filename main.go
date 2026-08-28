@@ -21,7 +21,7 @@ func main() {
 	http.HandleFunc("GET /results", resultHandler.GetAllHandler)
 	http.HandleFunc("GET /results/{gameType}", resultHandler.GetByGameHandler)
 
-	port := 8080
+	port := 8081
 	fmt.Printf("Listening on port %d\n", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	if err != nil {

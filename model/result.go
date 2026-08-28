@@ -23,3 +23,13 @@ func (draw DrawResult) ToResponse() response.ResultResponse {
 		SpecialResults: draw.SpecialResults,
 	}
 }
+
+func NewDrawResult(drawSystemId int64, drawDate time.Time, gameType GameType, results []int, specialResults []int) DrawResult {
+	return DrawResult{
+		DrawSystemId:   drawSystemId,
+		DrawDate:       drawDate,
+		GameType:       gameType,
+		Results:        results,
+		SpecialResults: specialResults,
+	}
+}

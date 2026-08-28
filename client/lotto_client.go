@@ -47,10 +47,12 @@ func (client *LottoClient) GetLastResults() ([]model.DrawResult, error) {
 		"%s/draw-results/last-results",
 		baseURL,
 	)
+
 	response, err := client.get(url)
 	if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
 
 	var drawDtos []DrawDto
 
@@ -59,7 +61,7 @@ func (client *LottoClient) GetLastResults() ([]model.DrawResult, error) {
 		return nil, err
 	}
 
-	drawResults := mapDrawDtos(drawDtos)
+	drawResults := flatMapToModels(drawDtos)
 
 	return drawResults, nil
 
@@ -76,6 +78,7 @@ func (client *LottoClient) GetResultsByDate(drawDate util.Date) ([]model.DrawRes
 	if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
 
 	var drawDtos []DrawDto
 
@@ -84,7 +87,7 @@ func (client *LottoClient) GetResultsByDate(drawDate util.Date) ([]model.DrawRes
 		return nil, err
 	}
 
-	drawResults := mapDrawDtos(drawDtos)
+	drawResults := flatMapToModels(drawDtos)
 
 	return drawResults, nil
 }
@@ -96,10 +99,10 @@ func mapDrawDtos(drawDtos []DrawDto) (drawResults []model.DrawResult) {
 	return
 }
 
-func (client *LottoClient) GetResultsByGame(gameTypeStr string) ([]model.DrawResult, error) {
+func (client *LottoClient) GetResultByGame(gameTypeStr string) (model.DrawResult, error) {
 	gameType, err := model.GameTypeFrom(gameTypeStr)
 	if err != nil {
-		return nil, err
+		return model.DrawResult{}, err
 	}
 	params := url.Values{}
 	params.Set("gameType", string(gameType))
@@ -110,16 +113,17 @@ func (client *LottoClient) GetResultsByGame(gameTypeStr string) ([]model.DrawRes
 
 	response, err := client.get(url)
 	if err != nil {
-		return nil, err
+		return model.DrawResult{}, err
 	}
-
+	defer response.Body.Close()
 	var drawDtos []DrawDto
 
 	err = json.NewDecoder(response.Body).Decode(&drawDtos)
 	if err != nil {
-		return nil, err
+		return model.DrawResult{}, err
 	}
-	drawResults := mapDrawDtos(drawDtos)
+	drawDto := drawDtos[0]
+	drawResult := drawDto.ToModel()
 
-	return drawResults, nil
+	return drawResult, nil
 }

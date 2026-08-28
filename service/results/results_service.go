@@ -34,10 +34,10 @@ func (service *ResultService) GetResultsByDate(drawDate util.Date) ([]model.Draw
 	return drawResults, nil
 }
 
-func (service *ResultService) GetResulstByGame(gameType model.GameType) ([]model.DrawResult, error) {
-	drawResults, err := service.lottoClient.GetResultsByGame(string(gameType))
+func (service *ResultService) GetResulstByGame(gameType model.GameType) (model.DrawResult, error) {
+	drawResult, err := service.lottoClient.GetResultByGame(string(gameType))
 	if err != nil {
-		return nil, err
+		return model.DrawResult{}, err
 	}
-	return drawResults, nil
+	return drawResult, nil
 }

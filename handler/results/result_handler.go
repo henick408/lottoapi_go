@@ -72,14 +72,14 @@ func (handler *ResultHandler) GetByGameHandler(writer http.ResponseWriter, reque
 		return
 	}
 
-	results, err := handler.service.GetResulstByGame(gameType)
+	result, err := handler.service.GetResulstByGame(gameType)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	responses := mapToResponses(results)
-	json.NewEncoder(writer).Encode(responses)
+	response := result.ToResponse()
+	json.NewEncoder(writer).Encode(response)
 }
 
 func mapToResponses(results []model.DrawResult) (responses []response.ResultResponse) {
