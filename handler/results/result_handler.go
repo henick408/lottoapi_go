@@ -8,6 +8,8 @@ import (
 	"lottoapi/util"
 	"net/http"
 	"time"
+
+	"github.com/labstack/echo/v5"
 )
 
 type ResultHandler struct {
@@ -62,24 +64,39 @@ func (handler *ResultHandler) GetAllHandler(writer http.ResponseWriter, request 
 
 }
 
-func (handler *ResultHandler) GetByGameHandler(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Content-Type", "application/json")
-	gameTypeStr := request.PathValue("gameType")
+// func (handler *ResultHandler) GetByGameHandler(writer http.ResponseWriter, request *http.Request) {
+// 	writer.Header().Set("Content-Type", "application/json")
+// 	gameTypeStr := request.PathValue("gameType")
 
+// 	gameType, err := model.GameTypeFrom(gameTypeStr)
+// 	if err != nil {
+// 		http.Error(writer, err.Error(), http.StatusBadRequest)
+// 		return
+// 	}
+
+// 	result, err := handler.service.GetResulstByGame(gameType)
+// 	if err != nil {
+// 		http.Error(writer, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	response := result.ToResponse()
+// 	json.NewEncoder(writer).Encode(response)
+// }
+
+func (handler *ResultHandler) GetByGameHandler(context *echo.Context) error {
+	gameTypeStr := context.Param("gameType")
 	gameType, err := model.GameTypeFrom(gameTypeStr)
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	result, err := handler.service.GetResulstByGame(gameType)
+	result, err := handler.service.GetResultsByGame(gameType)
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-
 	response := result.ToResponse()
-	json.NewEncoder(writer).Encode(response)
+	return context.JSON(http.StatusOK, response)
 }
 
 func mapToResponses(results []model.DrawResult) (responses []response.ResultResponse) {

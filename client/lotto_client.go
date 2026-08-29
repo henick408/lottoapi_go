@@ -59,14 +59,10 @@ func (lotto *LottoClient) GetResultsByDate(drawDate util.Date) ([]model.DrawResu
 	return drawResults, nil
 }
 
-func (lotto *LottoClient) GetResultByGame(gameTypeStr string) (model.DrawResult, error) {
-	gameType, err := model.GameTypeFrom(gameTypeStr)
-	if err != nil {
-		return model.DrawResult{}, err
-	}
+func (lotto *LottoClient) GetResultByGame(gameType model.GameType) (model.DrawResult, error) {
 	var drawDtos []DrawDto
 
-	_, err = lotto.Client.NewRequest().
+	_, err := lotto.Client.NewRequest().
 		SetQueryParam("gameType", string(gameType)).
 		SetResult(&drawDtos).
 		Get("draw-results/last-results-per-game")
