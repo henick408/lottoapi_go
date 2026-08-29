@@ -51,7 +51,7 @@ func (lotto *LottoClient) GetResultsByDate(drawDate util.Date) ([]model.DrawResu
 	_, err := lotto.Client.NewRequest().
 		SetQueryParam("drawDate", drawDate.ToString()).
 		SetResult(&drawDtos).
-		Get("/draw=results/by-date")
+		Get("/draw-results/by-date")
 	if err != nil {
 		return nil, err
 	}
