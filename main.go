@@ -21,9 +21,7 @@ func main() {
 	resultService := resultService.NewResultService(client)
 	resultHandler := resultHandler.NewResultHandler(resultService)
 	e.GET("/results", resultHandler.GetAllHandler)
-	//http.HandleFunc("GET /results", resultHandler.GetAllHandler)
 	e.GET("/results/:gameType", resultHandler.GetByGameHandler)
-	//http.HandleFunc("GET /results/{gameType}", resultHandler.GetByGameHandler)
 
 	port := 8081
 	fmt.Printf("Listening on port %d\n", port)
@@ -31,10 +29,5 @@ func main() {
 	if err := sc.Start(context.Background(), e); err != nil {
 		e.Logger.Error("Failed to start server", "error", err)
 	}
-
-	// err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
-	// if err != nil {
-	// 	panic(err)
-	// }
 
 }
