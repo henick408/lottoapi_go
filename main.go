@@ -6,16 +6,15 @@ import (
 	resultHandler "lottoapi/handler/results"
 	resultService "lottoapi/service/results"
 	"net/http"
-	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
-var httpClient = &http.Client{
-	Timeout: 10 * time.Second,
-}
+var restyClient = resty.New()
 
 func main() {
 
-	client := client.NewLottoClient(httpClient)
+	client := client.NewLottoClient(restyClient)
 	resultService := resultService.NewResultService(client)
 	resultHandler := resultHandler.NewResultHandler(resultService)
 	http.HandleFunc("GET /results", resultHandler.GetAllHandler)
