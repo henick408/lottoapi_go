@@ -47,6 +47,9 @@ func (drawDto DrawDto) ToModel() model.DrawResult {
 func flatMapToModels(drawDtos []DrawDto) (results []model.DrawResult) {
 	for _, drawDto := range drawDtos {
 		for _, result := range drawDto.Results {
+			if _, err := model.GameTypeFrom(result.GameType); err != nil {
+				continue
+			}
 			drawResult := model.NewDrawResult(result.DrawSystemId, result.DrawDate, model.GameType(result.GameType), result.ResultsJson, result.SpecialResults)
 			sort.Ints(drawResult.Results)
 			sort.Ints(drawResult.SpecialResults)

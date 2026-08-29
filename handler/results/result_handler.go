@@ -1,13 +1,14 @@
 package results
 
 import (
-	"encoding/json"
 	"lottoapi/model"
 	"lottoapi/response"
 	"lottoapi/service/results"
 	"lottoapi/util"
 	"net/http"
 	"time"
+
+	"github.com/labstack/echo/v5"
 )
 
 type ResultHandler struct {
@@ -20,20 +21,17 @@ func NewResultHandler(service *results.ResultService) *ResultHandler {
 	}
 }
 
-func (handler *ResultHandler) GetAllHandler(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Content-Type", "application/json")
-	drawDateStr := request.URL.Query().Get("drawDate")
-
+func (handler *ResultHandler) GetAllHandler(context *echo.Context) error {
+	drawDateStr := context.QueryParam("drawDate")
 	var (
 		results []model.DrawResult
 		err     error
 	)
 
 	if drawDateStr != "" {
-		date, parseErr := time.Parse("2006-01-02", drawDateStr)
+		date, parseErr := time.Parse(time.DateOnly, drawDateStr)
 		if parseErr != nil {
-			http.Error(writer, "Incorrect date", http.StatusBadRequest)
-			return
+			return echo.NewHTTPError(http.StatusBadRequest, "Incorrect date.")
 		}
 		drawDate := util.NewDate(
 			date.Year(),
@@ -46,40 +44,33 @@ func (handler *ResultHandler) GetAllHandler(writer http.ResponseWriter, request 
 		results, err = handler.service.GetLastResults()
 	}
 
-	if results == nil {
-		http.Error(writer, "No results found for given date", http.StatusNotFound)
-		return
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-		return
+	if results == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "No results found for given date.")
 	}
 
 	responses := mapToResponses(results)
 
-	json.NewEncoder(writer).Encode(responses)
+	return context.JSON(http.StatusOK, responses)
 
 }
 
-func (handler *ResultHandler) GetByGameHandler(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Content-Type", "application/json")
-	gameTypeStr := request.PathValue("gameType")
-
+func (handler *ResultHandler) GetByGameHandler(context *echo.Context) error {
+	gameTypeStr := context.Param("gameType")
 	gameType, err := model.GameTypeFrom(gameTypeStr)
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 
-	result, err := handler.service.GetResulstByGame(gameType)
+	result, err := handler.service.GetResultsByGame(gameType)
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-		return
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-
 	response := result.ToResponse()
-	json.NewEncoder(writer).Encode(response)
+	return context.JSON(http.StatusOK, response)
 }
 
 func mapToResponses(results []model.DrawResult) (responses []response.ResultResponse) {

@@ -8,10 +8,11 @@ import (
 type GameType string
 
 const (
-	GameTypeLotto       GameType = "Lotto"
-	GameTypeLottoPlus   GameType = "LottoPlus"
-	GameTypeMiniLotto   GameType = "MiniLotto"
-	GameTypeEuroJackpot GameType = "EuroJackpot"
+	GameTypeLotto        GameType = "Lotto"
+	GameTypeLottoPlus    GameType = "LottoPlus"
+	GameTypeMiniLotto    GameType = "MiniLotto"
+	GameTypeEuroJackpot  GameType = "EuroJackpot"
+	GameTypeEkstraPensja GameType = "EkstraPensja"
 )
 
 func GameTypeFrom(value string) (GameType, error) {
@@ -25,7 +26,9 @@ func GameTypeFrom(value string) (GameType, error) {
 		return GameTypeLottoPlus, nil
 	case "eurojackpot":
 		return GameTypeEuroJackpot, nil
+	case "ekstrapensja":
+		return GameTypeEkstraPensja, nil
 	default:
-		return "", fmt.Errorf("Unknown game type: %q", value)
+		return "", fmt.Errorf("Unknown game type: %s", value)
 	}
 }

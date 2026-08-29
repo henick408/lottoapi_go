@@ -34,8 +34,8 @@ func (service *ResultService) GetResultsByDate(drawDate util.Date) ([]model.Draw
 	return drawResults, nil
 }
 
-func (service *ResultService) GetResulstByGame(gameType model.GameType) (model.DrawResult, error) {
-	drawResult, err := service.lottoClient.GetResultByGame(string(gameType))
+func (service *ResultService) GetResultsByGame(gameType model.GameType) (model.DrawResult, error) {
+	drawResult, err := service.lottoClient.GetResultByGame(gameType)
 	if err != nil {
 		return model.DrawResult{}, err
 	}
