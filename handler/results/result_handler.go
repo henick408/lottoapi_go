@@ -1,7 +1,6 @@
 package results
 
 import (
-	"encoding/json"
 	"lottoapi/model"
 	"lottoapi/response"
 	"lottoapi/service/results"
@@ -22,20 +21,58 @@ func NewResultHandler(service *results.ResultService) *ResultHandler {
 	}
 }
 
-func (handler *ResultHandler) GetAllHandler(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Content-Type", "application/json")
-	drawDateStr := request.URL.Query().Get("drawDate")
+// func (handler *ResultHandler) GetAllHandler(writer http.ResponseWriter, request *http.Request) {
+// 	writer.Header().Set("Content-Type", "application/json")
+// 	drawDateStr := request.URL.Query().Get("drawDate")
 
+// 	var (
+// 		results []model.DrawResult
+// 		err     error
+// 	)
+
+// 	if drawDateStr != "" {
+// 		date, parseErr := time.Parse(time.DateOnly, drawDateStr)
+// 		if parseErr != nil {
+// 			http.Error(writer, "Incorrect date", http.StatusBadRequest)
+// 			return
+// 		}
+// 		drawDate := util.NewDate(
+// 			date.Year(),
+// 			int(date.Month()),
+// 			date.Day(),
+// 		)
+
+// 		results, err = handler.service.GetResultsByDate(drawDate)
+// 	} else {
+// 		results, err = handler.service.GetLastResults()
+// 	}
+
+// 	if results == nil {
+// 		http.Error(writer, "No results found for given date", http.StatusNotFound)
+// 		return
+// 	}
+
+// 	if err != nil {
+// 		http.Error(writer, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	responses := mapToResponses(results)
+
+// 	json.NewEncoder(writer).Encode(responses)
+// }
+
+func (handler *ResultHandler) GetAllHandler(context *echo.Context) error {
+	drawDateStr := context.QueryParam("drawDate")
 	var (
 		results []model.DrawResult
 		err     error
 	)
 
 	if drawDateStr != "" {
-		date, parseErr := time.Parse("2006-01-02", drawDateStr)
+		date, parseErr := time.Parse(time.DateOnly, drawDateStr)
 		if parseErr != nil {
-			http.Error(writer, "Incorrect date", http.StatusBadRequest)
-			return
+			return echo.NewHTTPError(http.StatusBadRequest, "Incorrect date.")
 		}
 		drawDate := util.NewDate(
 			date.Year(),
@@ -48,19 +85,17 @@ func (handler *ResultHandler) GetAllHandler(writer http.ResponseWriter, request 
 		results, err = handler.service.GetLastResults()
 	}
 
-	if results == nil {
-		http.Error(writer, "No results found for given date", http.StatusNotFound)
-		return
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-		return
+	if results == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "No results found for given date.")
 	}
 
 	responses := mapToResponses(results)
 
-	json.NewEncoder(writer).Encode(responses)
+	return context.JSON(http.StatusOK, responses)
 
 }
 
