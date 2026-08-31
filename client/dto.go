@@ -24,6 +24,19 @@ type GameResultDto struct {
 	SpecialResults []int
 }
 
+type PrizeDto struct {
+	prizes       map[byte]PrizeRowDto
+	drawDate     time.Time
+	drawSystemId int64
+	gameType     string
+	prizesEmpty  bool
+}
+
+type PrizeRowDto struct {
+	Prize      int
+	PrizeValue float64
+}
+
 func (drawDto DrawDto) ToModel() model.DrawResult {
 	var resultDto GameResultDto
 	for _, gameDto := range drawDto.Results {
