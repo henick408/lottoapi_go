@@ -49,7 +49,7 @@ func (handler *ResultHandler) GetAllHandler(context *echo.Context) error {
 	}
 
 	if results == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "No results found for given date.")
+		return echo.NewHTTPError(http.StatusNotFound, "No result found for given date")
 	}
 
 	responses := mapToResponses(results)
@@ -60,15 +60,44 @@ func (handler *ResultHandler) GetAllHandler(context *echo.Context) error {
 
 func (handler *ResultHandler) GetByGameHandler(context *echo.Context) error {
 	gameTypeStr := context.Param("gameType")
-	gameType, err := model.GameTypeFrom(gameTypeStr)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	gameType, gameTypeErr := model.GameTypeFrom(gameTypeStr)
+	if gameTypeErr != nil {
+		return echo.NewHTTPError(http.StatusNotFound, gameTypeErr.Error())
 	}
 
-	result, err := handler.service.GetResultsByGame(gameType)
+	var (
+		result model.DrawResult
+		err    error
+	)
+
+	drawDateStr := context.QueryParam("drawDate")
+
+	if drawDateStr != "" {
+		date, parseErr := time.Parse(time.DateOnly, drawDateStr)
+		if parseErr != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Incorrect date.")
+		}
+		drawDate := util.NewDate(
+			date.Year(),
+			int(date.Month()),
+			date.Day(),
+		)
+		result, err = handler.service.GetResultByDateByGame(drawDate, gameType)
+	} else {
+		result, err = handler.service.GetResultByGame(gameType)
+		if result.DrawSystemId == 0 {
+			return echo.NewHTTPError(http.StatusNotFound, "No result found for given date")
+		}
+	}
+
+	if result.DrawSystemId == 0 {
+		return echo.NewHTTPError(http.StatusNotFound, "No result found")
+	}
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
 	response := result.ToResponse()
 	return context.JSON(http.StatusOK, response)
 }
