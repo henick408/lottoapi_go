@@ -7,4 +7,7 @@ require (
 	github.com/labstack/echo/v5 v5.3.1
 )
 
-require golang.org/x/net v0.57.0 // indirect
+require (
+	github.com/joho/godotenv v1.5.1 // indirect
+	golang.org/x/net v0.57.0 // indirect
+)

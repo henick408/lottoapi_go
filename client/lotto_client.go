@@ -6,18 +6,15 @@ import (
 	"os"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/joho/godotenv"
 )
 
 var baseURL = "https://developers.lotto.pl/api/open/v1/lotteries"
 
 func getLottoSecret() string {
+	godotenv.Load(".env")
 	return os.Getenv("LOTTO_API_KEY")
 }
-
-// type LottoClient struct {
-// 	httpClient *http.Client
-// 	baseURL    string
-// }
 
 type LottoClient struct {
 	Client *resty.Client
